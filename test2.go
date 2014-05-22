@@ -2,7 +2,7 @@ package main
 
 import(
   "fmt"
-  "readdbf/go-dbf/godbf"
+  "code.google.com/p/go-dbf/godbf"
 )
 
 
