@@ -144,22 +144,20 @@ func main(){
             select{
                 case event := <-watcher.Event:
                     // 每秒测一次
-				if buildPeriod.Add(1 * time.Second).After(time.Now()) {
-					continue
-				}
-				buildPeriod = time.Now()
+        				if buildPeriod.Add(1 * time.Second).After(time.Now()) {
+        					continue
+        				}
+        				buildPeriod = time.Now()
+        
+                        //   更新时间判断
+        				mt := getFileModTime(event.Name)
+        				if t := eventTime[event.Name]; mt == t {
+        
+                            continue
+        				}
+        
+                        eventTime[event.Name] = mt
 
-                //   更新时间判断
-				mt := getFileModTime(event.Name)
-				if t := eventTime[event.Name]; mt == t {
-                    continue
-				}
-
-
-
-
-
-                    if event.IsModify() {
                         if event.Name == shfile { 
                             fmt.Println("INFO : file change :", event.Name)
                             err = readNsave(shfile, true)
@@ -175,7 +173,6 @@ func main(){
                                 fmt.Println(err)
                             }
                         }
-                    }
 
                 case watcher_err := <-watcher.Error:
                     // @todo 错误处理
