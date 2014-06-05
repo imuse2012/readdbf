@@ -24,6 +24,7 @@ var(
     ConfigFile string = "conf.ini"
     Engine *xorm.Engine
     usemysql bool
+    buildPeriod time.Time
 )
 
 func init(){
@@ -141,6 +142,10 @@ func main(){
         for{
             select{
                 case event := <-watcher.Event:
+				if buildPeriod.Add(1 * time.Second).After(time.Now()) {
+					continue
+				}
+				buildPeriod = time.Now()
                     if event.IsModify() {
                         if event.Name == shfile { 
                             fmt.Println("INFO : file change :", event.Name)
