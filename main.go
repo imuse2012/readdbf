@@ -460,6 +460,7 @@ func getFileModTime(path string) int64 {
 }
 
 func show(args... interface{}) {
+    fmt.Println(DEBUG)
     if DEBUG {
         fmt.Println(args)
     }
