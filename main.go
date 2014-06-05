@@ -26,6 +26,7 @@ var(
     usemysql bool
     buildPeriod time.Time
     eventTime   = make(map[string]int64)
+    DEBUG bool
 )
 
 func init(){
@@ -43,6 +44,8 @@ func init(){
     if err != nil {
         panic(err.Error())
     }
+
+    DEBUG = Cfg.MustBool("base", "debug", false)
 
     // redis链接
     host := Cfg.MustValue("redis", "host")
@@ -156,28 +159,32 @@ func main(){
                             continue
         				}
         
-                        fmt.Println("更新时间对比",t, mt)
+                        show("更新时间对比",t, mt)
                         eventTime[event.Name] = mt
 
                         if event.Name == shfile { 
-                            fmt.Println("INFO : file change :", event.Name)
+                            show("INFO : file change :", event.Name)
                             err = readNsave(shfile, true)
                             if err != nil {
-                                fmt.Println(err)
+                                show(err)
+                            } else {
+                                show("read and save done!", event.Name)
                             }
                         }
 
                         if event.Name == szfile {
-                            fmt.Println("INFO : file change :", event.Name)
+                            show("INFO : file change :", event.Name)
                             err = readNsave(szfile, false)
                             if err != nil {
-                                fmt.Println(err)
+                                show(err)
+                            } else {
+                                show("read and save done!", event.Name)
                             }
                         }
 
                 case watcher_err := <-watcher.Error:
                     // @todo 错误处理
-                    fmt.Println("ERROR Fail to watch file", watcher_err)
+                    show("ERROR Fail to watch file", watcher_err)
             }
         }
     }()
@@ -206,17 +213,14 @@ func readNsave(file string, isSH bool) (err error){
       }
       err = save2redis(rows[i], fields)
       if err !=nil {
-          fmt.Println("save2redis failed",err)
           return
       }
       err = save2mysql(rows[i], fields)
       if err != nil {
-          fmt.Println("save2mysql failed", err)
           return
       }
       // go error mysql ERROR 1040 (00000): Too many connections
       //go save2mysql(rows[i], fields)
-      return
     }
 
     return
@@ -258,8 +262,6 @@ func save2mysql(row, fields []string) (err error) {
         if err != nil {
             return err
         }
-//        fmt.Println(insertRes)
-        fmt.Println("添加成功", vals[0])
     } else {
         setStr := ""
         for i := 1; i<arrLen; i++{
@@ -269,17 +271,12 @@ func save2mysql(row, fields []string) (err error) {
             }
         }
         updateSql := fmt.Sprintf("UPDATE `sjshq` SET %s WHERE `HQZQDM`=\"%s\"", setStr, vals[0])
-        fmt.Println("has data", vals[0])
         _, err := Engine.Exec(updateSql)
         if err != nil {
             return err
         }
-//        fmt.Println("更新成功", vals[0])
-//        fmt.Println(updateRes)
     }
 
-//    fmt.Println(keys)
-//    fmt.Println(vals)
     return
 }
 
@@ -351,13 +348,6 @@ func ReadDBF(file string, isSH bool)( rows [][]string, fieldNames []string , err
 
 // 保存到redis
 func save2redis(row, fields []string) (err error){
-//    fmt.Println(row)
-/*
-    if len(row) != len(fields){
-        return errors.New(fmt.Sprintf("Error: row fields not fix: row-keys-num(%d) for fields num(%d)", len(row), len(fields)))
-    }
-    */
-
     key := fmt.Sprintf("stock-data:%s", row[0])
 
     args := []interface{}{key}
@@ -378,7 +368,6 @@ func save2redis(row, fields []string) (err error){
         return
     }
 
-    fmt.Println("save2redis OK")
     return
 }
 
@@ -468,4 +457,10 @@ func getFileModTime(path string) int64 {
 	}
 
 	return fi.ModTime().Unix()
+}
+
+func show(args... interface{}) {
+    if DEBUG {
+        fmt.Println(args)
+    }
 }
