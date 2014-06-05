@@ -25,6 +25,7 @@ var(
     Engine *xorm.Engine
     usemysql bool
     buildPeriod time.Time
+    eventTime   = make(map[string]int64)
 )
 
 func init(){
@@ -142,10 +143,22 @@ func main(){
         for{
             select{
                 case event := <-watcher.Event:
+                    // 每秒测一次
 				if buildPeriod.Add(1 * time.Second).After(time.Now()) {
 					continue
 				}
 				buildPeriod = time.Now()
+
+                //   更新时间判断
+				mt := getFileModTime(event.Name)
+				if t := eventTime[event.Name]; mt == t {
+                    continue
+				}
+
+
+
+
+
                     if event.IsModify() {
                         if event.Name == shfile { 
                             fmt.Println("INFO : file change :", event.Name)
@@ -205,6 +218,7 @@ func readNsave(file string, isSH bool) (err error){
       }
       // go error mysql ERROR 1040 (00000): Too many connections
       //go save2mysql(rows[i], fields)
+      return
     }
 
     return
@@ -242,7 +256,6 @@ func save2mysql(row, fields []string) (err error) {
             }
         }
         inserSql := fmt.Sprintf("INSERT INTO `sjshq`(%s) VALUES(%s)", fieldStr, valueStr)
-        fmt.Println("还没数据", inserSql)
         _, err := Engine.Exec(inserSql)
         if err != nil {
             return err
@@ -258,7 +271,7 @@ func save2mysql(row, fields []string) (err error) {
             }
         }
         updateSql := fmt.Sprintf("UPDATE `sjshq` SET %s WHERE `HQZQDM`=\"%s\"", setStr, vals[0])
-//        fmt.Println("has data", updateSql)
+        fmt.Println("has data", vals[0])
         _, err := Engine.Exec(updateSql)
         if err != nil {
             return err
@@ -441,3 +454,20 @@ func ExecDir() (string, error) {
 }
 
 
+func getFileModTime(path string) int64 {
+	path = strings.Replace(path, "\\", "/", -1)
+	f, err := os.Open(path)
+	if err != nil {
+		fmt.Println("[ERRO] Fail to open file[ %s ]\n", err)
+		return time.Now().Unix()
+	}
+	defer f.Close()
+
+	fi, err := f.Stat()
+	if err != nil {
+		fmt.Println("[ERRO] Fail to get file information[ %s ]\n", err)
+		return time.Now().Unix()
+	}
+
+	return fi.ModTime().Unix()
+}
