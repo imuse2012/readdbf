@@ -205,7 +205,6 @@ func readNsave(file string, isSH bool) (err error){
       }
       // go error mysql ERROR 1040 (00000): Too many connections
       //go save2mysql(rows[i], fields)
-      return
     }
 
     return
@@ -243,7 +242,7 @@ func save2mysql(row, fields []string) (err error) {
             }
         }
         inserSql := fmt.Sprintf("INSERT INTO `sjshq`(%s) VALUES(%s)", fieldStr, valueStr)
-//        fmt.Println("还没数据", inserSql)
+        fmt.Println("还没数据", inserSql)
         _, err := Engine.Exec(inserSql)
         if err != nil {
             return err
@@ -368,7 +367,7 @@ func save2redis(row, fields []string) (err error){
         return
     }
 
-//    fmt.Println("save2redis OK")
+    fmt.Println("save2redis OK")
     return
 }
 
