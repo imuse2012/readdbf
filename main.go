@@ -151,11 +151,12 @@ func main(){
         
                         //   更新时间判断
         				mt := getFileModTime(event.Name)
-        				if t := eventTime[event.Name]; mt == t {
-        
+                        t := eventTime[event.Name]
+        				if mt == t {
                             continue
         				}
         
+                        fmt.Println("更新时间对比",t, mt)
                         eventTime[event.Name] = mt
 
                         if event.Name == shfile { 
