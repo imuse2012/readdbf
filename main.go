@@ -162,6 +162,7 @@ func main(){
                         show("更新时间对比",t, mt)
                         eventTime[event.Name] = mt
 
+                        st := time.Now().UnixNano()
                         if event.Name == shfile { 
                             show("INFO : file change :", event.Name)
                             err = readNsave(shfile, true)
@@ -181,7 +182,8 @@ func main(){
                                 show("read and save done!", event.Name)
                             }
                         }
-
+                        et := time.Now().UnixNano() - st
+                        fmt.Println("用时", et/1000000000000, "秒")
                 case watcher_err := <-watcher.Error:
                     // @todo 错误处理
                     show("ERROR Fail to watch file", watcher_err)
@@ -199,35 +201,6 @@ func main(){
     defer watcher.Close()
 }
 
-// 保存到数据库 
-func readNsave(file string, isSH bool) (err error){
-    rows, fields, err := ReadDBF(file, isSH) 
-    if err != nil {
-        return
-    }
-
-    rowLen := len(rows)
-    for i := 0; i<rowLen; i++ {
-      if len(rows[i]) != len(fields){
-        return errors.New(fmt.Sprintf("Error: row fields not fix: row-keys-num(%d) for fields num(%d)", len(rows[i]), len(fields)))
-      }
-      err = save2redis(rows[i], fields)
-      if err !=nil {
-          return
-      }
-
-      if usemysql {
-          err = save2mysql(rows[i], fields)
-          if err != nil {
-            return
-          }
-      }
-      // go error mysql ERROR 1040 (00000): Too many connections
-      //go save2mysql(rows[i], fields)
-    }
-
-    return
-}
 
 // 限制 goroutine
 
@@ -463,8 +436,37 @@ func getFileModTime(path string) int64 {
 }
 
 func show(args... interface{}) {
-    fmt.Println(DEBUG)
     if DEBUG {
         fmt.Println(args)
     }
+}
+
+// 保存到数据库 
+func readNsave(file string, isSH bool) (err error){
+    rows, fields, err := ReadDBF(file, isSH) 
+    if err != nil {
+        return
+    }
+
+    rowLen := len(rows)
+    for i := 0; i<rowLen; i++ {
+      if len(rows[i]) != len(fields){
+        return errors.New(fmt.Sprintf("Error: row fields not fix: row-keys-num(%d) for fields num(%d)", len(rows[i]), len(fields)))
+      }
+      err = save2redis(rows[i], fields)
+      if err !=nil {
+          return
+      }
+
+      if usemysql {
+          err = save2mysql(rows[i], fields)
+          if err != nil {
+            return
+          }
+      }
+      // go error mysql ERROR 1040 (00000): Too many connections
+      //go save2mysql(rows[i], fields)
+    }
+
+    return
 }
