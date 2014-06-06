@@ -256,6 +256,7 @@ func save2mysql(row, fields []string) (err error) {
         }
     }
 
+    show("save2mysql done", vals[0])
     return
 }
 
@@ -347,6 +348,7 @@ func save2redis(row, fields []string) (err error){
         return
     }
 
+    show("save2redis done", row[0])
     return
 }
 
