@@ -256,7 +256,6 @@ func save2mysql(row, fields []string) (err error) {
         }
     }
 
-    show("save2mysql done", vals[0])
     return
 }
 
@@ -348,7 +347,6 @@ func save2redis(row, fields []string) (err error){
         return
     }
 
-    show("save2redis done", row[0])
     return
 }
 
@@ -475,6 +473,7 @@ func doSave(row, fields []string, ch chan int) (err error){
           <-ch
           return
       }
+      show("save2redis done")
 
       if usemysql {
           err = save2mysql(row, fields)
@@ -482,6 +481,7 @@ func doSave(row, fields []string, ch chan int) (err error){
             <-ch
             return
           }
+          show("save2mysql done")
       }
 
       <-ch
