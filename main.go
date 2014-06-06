@@ -473,7 +473,6 @@ func doSave(row, fields []string, ch chan int) (err error){
           <-ch
           return
       }
-      show("save2redis done")
 
       if usemysql {
           err = save2mysql(row, fields)
@@ -481,7 +480,6 @@ func doSave(row, fields []string, ch chan int) (err error){
             <-ch
             return
           }
-          show("save2mysql done")
       }
 
       <-ch
