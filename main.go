@@ -24,7 +24,7 @@ var(
     WorkDir string
     ConfigFile string = "conf.ini"
     Engine *xorm.Engine
-    usemysql bool
+    useMysql bool
     buildPeriod time.Time
     eventTime   = make(map[string]int64)
     DEBUG bool
@@ -474,7 +474,7 @@ func doSave(row, fields []string, ch chan int) (err error){
           return
       }
 
-      if usemysql {
+      if useMysql {
           err = save2mysql(row, fields)
           if err != nil {
             <-ch
