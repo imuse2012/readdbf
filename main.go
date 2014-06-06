@@ -159,7 +159,6 @@ func main(){
                             continue
         				}
         
-                        show("更新时间对比",t, mt)
                         eventTime[event.Name] = mt
 
                         st := time.Now().UnixNano()
@@ -169,7 +168,7 @@ func main(){
                             if err != nil {
                                 show(err)
                             } else {
-                                show("read and save done!", event.Name)
+                                //show("read and save done!", event.Name)
                             }
                         }
 
@@ -179,7 +178,7 @@ func main(){
                             if err != nil {
                                 show(err)
                             } else {
-                                show("read and save done!", event.Name)
+                                //show("read and save done!", event.Name)
                             }
                         }
                         et := time.Now().UnixNano() - st
