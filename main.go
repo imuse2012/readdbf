@@ -60,7 +60,7 @@ func init(){
     initRedis(fmt.Sprintf("%s:%s", host, port), "")
 
     // mysql
-    useMysql := Cfg.MustBool("base", "usemysql")
+    useMysql = Cfg.MustBool("base", "usemysql")
 
     if useMysql {
         // mysql链接
