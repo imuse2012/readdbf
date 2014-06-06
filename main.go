@@ -4,6 +4,7 @@ import(
     "errors"
     "fmt"
     "time"
+    "runtime"
     "os"
     "os/exec"
     "path"
@@ -30,6 +31,8 @@ var(
 )
 
 func init(){
+    runtime.GOMAXPROCS(2) //使用CPU核心数
+
     var err error
 
     // 当前目录
