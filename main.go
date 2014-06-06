@@ -183,7 +183,7 @@ func main(){
                             }
                         }
                         et := time.Now().UnixNano() - st
-                        fmt.Println(fmt.Sprintf("用时毫秒", float64(et/1000000000)))
+                        fmt.Println(fmt.Sprintf("用时%d毫秒", et/1000000))
                 case watcher_err := <-watcher.Error:
                     // @todo 错误处理
                     show("ERROR Fail to watch file", watcher_err)
