@@ -215,9 +215,12 @@ func readNsave(file string, isSH bool) (err error){
       if err !=nil {
           return
       }
-      err = save2mysql(rows[i], fields)
-      if err != nil {
-          return
+
+      if usemysql {
+          err = save2mysql(rows[i], fields)
+          if err != nil {
+            return
+          }
       }
       // go error mysql ERROR 1040 (00000): Too many connections
       //go save2mysql(rows[i], fields)
