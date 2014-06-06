@@ -159,6 +159,7 @@ func main(){
                             continue
         				}
         
+                        show("更新时间对比",t, mt)
                         eventTime[event.Name] = mt
 
                         st := time.Now().UnixNano()
@@ -447,25 +448,37 @@ func readNsave(file string, isSH bool) (err error){
         return
     }
 
+    var ch = make(chan int, 100)
+
     rowLen := len(rows)
     for i := 0; i<rowLen; i++ {
       if len(rows[i]) != len(fields){
         return errors.New(fmt.Sprintf("Error: row fields not fix: row-keys-num(%d) for fields num(%d)", len(rows[i]), len(fields)))
       }
-      err = save2redis(rows[i], fields)
-      if err !=nil {
-          return
-      }
-
-      if usemysql {
-          err = save2mysql(rows[i], fields)
-          if err != nil {
-            return
-          }
-      }
-      // go error mysql ERROR 1040 (00000): Too many connections
+      ch <-1
+      go doSave(rows[i], fields, ch)
+           // go error mysql ERROR 1040 (00000): Too many connections
       //go save2mysql(rows[i], fields)
     }
 
     return
+}
+
+func doSave(row, fields []string, ch chan int) (err error){
+     err = save2redis(row, fields)
+      if err !=nil {
+          <-ch
+          return
+      }
+
+      if usemysql {
+          err = save2mysql(row, fields)
+          if err != nil {
+            <-ch
+            return
+          }
+      }
+
+      <-ch
+      return
 }
