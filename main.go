@@ -110,6 +110,19 @@ func initRedis(server, password string){
 }
 
 func main(){
+    defer func(){
+        if err := recover(); err != nil {
+            fmt.Println("程序错误")
+            fmt.Println(err)
+            fmt.Println("重新启动")
+            run()
+        }
+    }()
+
+    run()
+}
+
+func run(){
     var err error
 
     shfile := Cfg.MustValue("file", "shfile")
